@@ -1,0 +1,16 @@
+.gitignore
+.npmignore
+.openapi-generator-ignore
+api.ts
+base.ts
+common.ts
+configuration.ts
+docs/AppApi.md
+docs/LiabilityApi.md
+docs/OfficerApi.md
+docs/StudentApi.md
+docs/StudentDto.md
+docs/StudentPatchDto.md
+docs/StudentRegistrationDto.md
+git_push.sh
+index.ts
