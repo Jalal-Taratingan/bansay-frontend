@@ -172,7 +172,7 @@ export default defineComponent({
   position: relative;
   width: 400px;
   max-width: 90vw;
-  background: #fff;
+  background: #f0f4f8;
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   padding: 30px;
@@ -197,13 +197,18 @@ export default defineComponent({
 .input-box select {
   width: 100%;
   padding: 13px 50px 13px 20px;
-  background: #eee;
+  background: #cbd5e1;
   border-radius: 8px;
   border: none;
   outline: none;
   font-size: 16px;
-  color: gray;
+  color: #2d3748;
   font-weight: 500;
+}
+
+.input-box input::placeholder {
+  color: #4a5568;
+  opacity: 1;
 }
 
 .input-error {
@@ -217,13 +222,13 @@ export default defineComponent({
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: gray;
+  color: #2d3748;
 }
 
 .btn {
   width: 100%;
   height: 48px;
-  background: #3366ff;
+  background: #1e40af;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -240,24 +245,51 @@ export default defineComponent({
   justify-content: center;
   margin-bottom: 0;
 }
+.logo {
+  width: 110px;
+  height: auto;
+  margin-bottom: 15px;
+  border-radius: 20%;
+  background-color: #ffffff;
+  padding: 10px;
+  box-shadow: 0 8px 25px rgba(37, 78, 218, 0.25);
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(37, 78, 218, 0.35);
+}
 
 .logo {
-  width: 100px;
-  height: auto;
-  margin-bottom: 0px;
+  animation: fadeInLogo 0.8s ease-in-out;
+}
+
+@keyframes fadeInLogo {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .app-title {
   font-size: 30px;
   font-weight: 700;
-  color: rgb(204, 24, 114);
+  color: #2d3748;
   text-transform: uppercase;
 }
 
 .login h1,
 .register h1 {
   font-size: 30px;
-  color: #3366ff;
+  color: #2d3748;
+  margin-bottom: 5px;
   font-weight: 700;
 }
 
@@ -267,7 +299,7 @@ p {
 }
 
 p a {
-  color: #3366ff;
+  color: #2952e3;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -285,9 +317,9 @@ p a {
   border: 2px solid #ccc;
   border-radius: 50%;
   font-size: 20px;
-  color: #333;
+  color: #2d3748;
   margin: 0 5px;
-  background: #fff;
+  background: #cbd5e1;
   text-decoration: none;
 }
 
@@ -297,7 +329,7 @@ p a {
 }
 
 .error-message {
-  color: #e74c3c;
+  color: #e53e3e;
   font-size: 14px;
   margin-top: -10px;
   margin-bottom: 10px;
