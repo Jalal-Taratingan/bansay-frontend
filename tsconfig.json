@@ -1,4 +1,3 @@
 {
-  "extends": "./.quasar/tsconfig.json",
-  "exclude": ["node_modules", "dist", "src/services/sdk/*"]
+  "extends": "./.quasar/tsconfig.json"
 }
