@@ -39,7 +39,7 @@
       </div>
 
       <div class="form-box register" :class="{ active: !isLogin }">
-        <form>
+        <q-form @submit="register">
           <div class="logo-header">
             <img :src="logo" alt="Bansay Logo" class="logo" />
             <h2 class="app-title">Bansay App</h2>
@@ -48,20 +48,20 @@
           <h1>Register</h1>
 
           <div class="input-box">
-            <input type="text" placeholder="First Name" required />
+            <input v-model="firstName" type="text" placeholder="First Name" required />
           </div>
 
           <div class="input-box">
-            <input type="text" placeholder="Last Name" required />
+            <input v-model="lastName" type="text" placeholder="Last Name" required />
           </div>
 
           <div class="input-box">
-            <input type="text" placeholder="Username" required />
+            <input v-model="userName" type="text" placeholder="Username" required />
             <i class="bx bxs-user"></i>
           </div>
 
           <div class="input-box">
-            <input type="email" placeholder="Email" required />
+            <input v-model="email" type="email" placeholder="Email" required />
             <i class="bx bxs-envelope"></i>
           </div>
 
@@ -84,7 +84,7 @@
           <p v-if="passwordError" class="error-message">{{ passwordError }}</p>
 
           <div class="input-box">
-            <select required>
+            <select required v-model="role">
               <option value="" disabled selected>Select Role</option>
               <option value="student">Student</option>
               <option value="officer">Officer</option>
@@ -106,48 +106,53 @@
             <a href="#"><i class="bx bxl-github"></i></a>
             <a href="#"><i class="bx bxl-linkedin"></i></a>
           </div>
-        </form>
+        </q-form>
       </div>
     </div>
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+<script lang="ts" setup>
+import { ref, watch } from 'vue';
 import logo from '../assets/logo.png';
 import 'boxicons/css/boxicons.min.css';
+import { useAuthStore } from 'src/stores/auth-store';
+import { type UserRegisterDtoRoleEnum } from 'src/services/sdk';
 
-export default defineComponent({
-  name: 'LoginRegister',
-  setup() {
-    const isLogin = ref(true);
-    const password = ref('');
-    const confirmPassword = ref('');
-    const passwordError = ref('');
+const authStore = useAuthStore();
+const isLogin = ref(true);
+const password = ref('');
+const confirmPassword = ref('');
+const passwordError = ref('');
+const firstName = ref('');
+const lastName = ref('');
+const email = ref('');
+const userName = ref('');
+const role = ref('');
 
-    const toggleView = (e: Event, showLogin: boolean) => {
-      e.preventDefault();
-      isLogin.value = showLogin;
-    };
+const toggleView = (e: Event, showLogin: boolean) => {
+  e.preventDefault();
+  isLogin.value = showLogin;
+};
 
-    watch([password, confirmPassword], () => {
-      if (confirmPassword.value && password.value !== confirmPassword.value) {
-        passwordError.value = 'Passwords do not match';
-      } else {
-        passwordError.value = '';
-      }
-    });
-
-    return {
-      logo,
-      isLogin,
-      toggleView,
-      password,
-      confirmPassword,
-      passwordError,
-    };
-  },
+watch([password, confirmPassword], () => {
+  if (confirmPassword.value && password.value !== confirmPassword.value) {
+    passwordError.value = 'Passwords do not match';
+  } else {
+    passwordError.value = '';
+  }
 });
+
+async function register() {
+  await authStore.register({
+    firstName: firstName.value,
+    lastName: lastName.value,
+    email: email.value,
+    password: password.value,
+    role: role.value as UserRegisterDtoRoleEnum,
+    username: userName.value,
+  });
+}
 </script>
 
 <style scoped>
