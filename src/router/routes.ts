@@ -7,11 +7,11 @@ const routes = [
 
   {
     path: '/student-dashboard',
-    component: () => import('pages/StudentDashboard.vue'),
+    component: () => import('src/pages/Students/StudentDashboard.vue'),
   },
   {
     path: '/officer-dashboard',
-    component: () => import('pages/OfficerDashboard.vue'),
+    component: () => import('src/pages/Officer/OfficerDashboard.vue'),
   },
   {
     path: '/admin-dashboard',

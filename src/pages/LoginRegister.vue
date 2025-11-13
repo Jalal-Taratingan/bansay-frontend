@@ -2,27 +2,39 @@
   <q-page class="bg-grey-2 flex flex-center">
     <div class="container">
       <div class="form-box login" :class="{ active: isLogin }">
-        <form>
+        <q-form @submit.prevent="handleLogin">
           <div class="logo-header">
             <img :src="logo" alt="Bansay Logo" class="logo" />
             <h2 class="app-title">Bansay App</h2>
           </div>
 
           <h1>Login</h1>
+
           <div class="input-box">
-            <input type="text" placeholder="Username" required />
+            <input v-model="username" type="text" placeholder="Username" required />
             <i class="bx bxs-user"></i>
           </div>
 
           <div class="input-box">
-            <input type="password" placeholder="Password" required />
+            <input v-model="password" type="password" placeholder="Password" required />
             <i class="bx bxs-lock"></i>
+          </div>
+
+          <div class="input-box">
+            <select v-model="selectedRole" required>
+              <option value="" disabled>Select Role</option>
+              <option value="student">Student</option>
+              <option value="officer">Officer</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           <div class="forgot-link">
             <a href="#">Forgot Password?</a>
           </div>
+
           <button type="submit" class="btn">Login</button>
+
           <p>
             Don’t have an account?
             <a href="#" @click="toggleView($event, false)">Register</a>
@@ -35,11 +47,11 @@
             <a href="#"><i class="bx bxl-github"></i></a>
             <a href="#"><i class="bx bxl-linkedin"></i></a>
           </div>
-        </form>
+        </q-form>
       </div>
 
       <div class="form-box register" :class="{ active: !isLogin }">
-        <q-form @submit="register">
+        <q-form @submit.prevent="handleRegister">
           <div class="logo-header">
             <img :src="logo" alt="Bansay Logo" class="logo" />
             <h2 class="app-title">Bansay App</h2>
@@ -56,7 +68,7 @@
           </div>
 
           <div class="input-box">
-            <input v-model="userName" type="text" placeholder="Username" required />
+            <input v-model="username" type="text" placeholder="Username" required />
             <i class="bx bxs-user"></i>
           </div>
 
@@ -66,15 +78,15 @@
           </div>
 
           <div class="input-box">
-            <input type="password" placeholder="Password" v-model="password" required />
+            <input v-model="password" type="password" placeholder="Password" required />
             <i class="bx bxs-lock"></i>
           </div>
 
           <div class="input-box">
             <input
+              v-model="confirmPassword"
               type="password"
               placeholder="Retype Password"
-              v-model="confirmPassword"
               :class="{ 'input-error': passwordError }"
               required
             />
@@ -84,8 +96,8 @@
           <p v-if="passwordError" class="error-message">{{ passwordError }}</p>
 
           <div class="input-box">
-            <select required v-model="role">
-              <option value="" disabled selected>Select Role</option>
+            <select v-model="selectedRole" required>
+              <option value="" disabled>Select Role</option>
               <option value="student">Student</option>
               <option value="officer">Officer</option>
               <option value="admin">Admin</option>
@@ -112,47 +124,103 @@
   </q-page>
 </template>
 
-<script lang="ts" setup>
-import { ref, watch } from 'vue';
+<script lang="ts">
+import { defineComponent, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import logo from '../assets/logo.png';
 import 'boxicons/css/boxicons.min.css';
-import { useAuthStore } from 'src/stores/auth-store';
-import { type UserRegisterDtoRoleEnum } from 'src/services/sdk';
 
-const authStore = useAuthStore();
-const isLogin = ref(true);
-const password = ref('');
-const confirmPassword = ref('');
-const passwordError = ref('');
-const firstName = ref('');
-const lastName = ref('');
-const email = ref('');
-const userName = ref('');
-const role = ref('');
+export default defineComponent({
+  name: 'LoginRegister',
+  setup() {
+    const router = useRouter();
 
-const toggleView = (e: Event, showLogin: boolean) => {
-  e.preventDefault();
-  isLogin.value = showLogin;
-};
+    const isLogin = ref(true);
+    const username = ref('');
+    const password = ref('');
+    const confirmPassword = ref('');
+    const selectedRole = ref('');
+    const passwordError = ref('');
 
-watch([password, confirmPassword], () => {
-  if (confirmPassword.value && password.value !== confirmPassword.value) {
-    passwordError.value = 'Passwords do not match';
-  } else {
-    passwordError.value = '';
-  }
+    const firstName = ref('');
+    const lastName = ref('');
+    const email = ref('');
+
+    const toggleView = (e: Event, showLogin: boolean) => {
+      e.preventDefault();
+      isLogin.value = showLogin;
+    };
+
+    const handleLogin = () => {
+      console.log('Login clicked', username.value, password.value, selectedRole.value);
+
+      if (!selectedRole.value) {
+        alert('Please select a role.');
+        return;
+      }
+
+      if (selectedRole.value === 'student') {
+        void router.push('/student-dashboard');
+      } else if (selectedRole.value === 'officer') {
+        void router.push('/officer-dashboard');
+      } else if (selectedRole.value === 'admin') {
+        void router.push('/admin-dashboard');
+      }
+    };
+
+    const handleRegister = () => {
+      console.log(
+        'Register clicked',
+        username.value,
+        password.value,
+        confirmPassword.value,
+        selectedRole.value,
+      );
+
+      if (password.value !== confirmPassword.value) {
+        passwordError.value = 'Passwords do not match';
+        return;
+      }
+
+      if (!selectedRole.value) {
+        alert('Please select a role.');
+        return;
+      }
+
+      if (selectedRole.value === 'student') {
+        void router.push('/student-dashboard');
+      } else if (selectedRole.value === 'officer') {
+        void router.push('/officer-dashboard');
+      } else if (selectedRole.value === 'admin') {
+        void router.push('/admin-dashboard');
+      }
+    };
+
+    watch([password, confirmPassword], () => {
+      if (confirmPassword.value && password.value !== confirmPassword.value) {
+        passwordError.value = 'Passwords do not match';
+      } else {
+        passwordError.value = '';
+      }
+    });
+
+    return {
+      logo,
+      isLogin,
+      username,
+      password,
+      confirmPassword,
+      selectedRole,
+      passwordError,
+      firstName,
+      lastName,
+      email,
+      toggleView,
+      handleLogin,
+      handleRegister,
+    };
+  },
 });
-
-async function register() {
-  await authStore.register({
-    firstName: firstName.value,
-    lastName: lastName.value,
-    email: email.value,
-    password: password.value,
-    role: role.value as UserRegisterDtoRoleEnum,
-    username: userName.value,
-  });
-}
 </script>
 
 <style scoped>
@@ -164,7 +232,6 @@ async function register() {
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
-
 .q-page {
   min-height: 100vh;
   display: flex;
@@ -172,7 +239,6 @@ async function register() {
   justify-content: center;
   background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
 }
-
 .container {
   position: relative;
   width: 400px;
@@ -184,20 +250,16 @@ async function register() {
   text-align: center;
   transition: all 0.4s ease;
 }
-
 .form-box {
   display: none;
 }
-
 .form-box.active {
   display: block;
 }
-
 .input-box {
   position: relative;
   margin: 15px 0;
 }
-
 .input-box input,
 .input-box select {
   width: 100%;
@@ -210,17 +272,14 @@ async function register() {
   color: #2d3748;
   font-weight: 500;
 }
-
 .input-box input::placeholder {
   color: #4a5568;
   opacity: 1;
 }
-
 .input-error {
   border: 2px solid #e74c3c !important;
   background-color: #ffe6e6;
 }
-
 .input-box i {
   position: absolute;
   right: 15px;
@@ -229,7 +288,6 @@ async function register() {
   font-size: 20px;
   color: #2d3748;
 }
-
 .btn {
   width: 100%;
   height: 48px;
@@ -242,7 +300,6 @@ async function register() {
   font-weight: 600;
   margin-top: 10px;
 }
-
 .logo-header {
   display: flex;
   flex-direction: column;
@@ -262,16 +319,13 @@ async function register() {
     transform 0.4s ease,
     box-shadow 0.4s ease;
 }
-
 .logo:hover {
   transform: scale(1.05);
   box-shadow: 0 10px 30px rgba(37, 78, 218, 0.35);
 }
-
 .logo {
   animation: fadeInLogo 0.8s ease-in-out;
 }
-
 @keyframes fadeInLogo {
   from {
     opacity: 0;
@@ -282,14 +336,12 @@ async function register() {
     transform: scale(1);
   }
 }
-
 .app-title {
   font-size: 30px;
   font-weight: 700;
   color: #2d3748;
   text-transform: uppercase;
 }
-
 .login h1,
 .register h1 {
   font-size: 30px;
@@ -297,22 +349,18 @@ async function register() {
   margin-bottom: 5px;
   font-weight: 700;
 }
-
 p {
   font-size: 14px;
   margin-top: 15px;
 }
-
 p a {
   color: #2952e3;
   text-decoration: underline;
   cursor: pointer;
 }
-
 .social-icons {
   margin-top: 10px;
 }
-
 .social-icons a {
   display: inline-flex;
   justify-content: center;
@@ -327,12 +375,10 @@ p a {
   background: #cbd5e1;
   text-decoration: none;
 }
-
 .social-icons a:hover {
   transform: scale(1.1);
   transition: 0.3s ease;
 }
-
 .error-message {
   color: #e53e3e;
   font-size: 14px;
