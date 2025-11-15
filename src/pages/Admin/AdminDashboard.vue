@@ -13,7 +13,7 @@
 
         <q-card class="overview-card">
           <q-card-section class="flex items-center q-pa-md">
-            <div class="card-content">
+            <div class="card-content q-ml-md">
               <div class="text-h4 text-weight-bold">0</div>
               <div class="text-body2">Pending Approvals</div>
             </div>
@@ -44,7 +44,7 @@
           <div class="text-h5 text-center text-primary q-mb-md">Admin Actions</div>
 
           <div class="action-grid">
-            <q-card class="admin-action-card cursor-pointer">
+            <q-card class="admin-action-card cursor-pointer" @click="navigateToUserManagement">
               <q-card-section class="text-center">
                 <q-icon name="person" size="48px" color="primary" class="q-mb-sm" />
                 <div class="text-h6 text-primary">User Management</div>
@@ -59,6 +59,15 @@
 </template>
 
 <script lang="ts" setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const navigateToUserManagement = () => {
+  router.push('/admin/user-management').catch(() => {
+
+  })
+}
 </script>
 
 <style scoped>
@@ -83,6 +92,7 @@
   transform: translateY(-3px);
   box-shadow: 0 10px 25px rgba(25, 118, 210, 0.4);
 }
+
 
 .card-content {
   color: white;

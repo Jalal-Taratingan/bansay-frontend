@@ -17,6 +17,10 @@ const routes = [
     path: '/admin-dashboard',
     component: () => import('src/pages/Admin/AdminDashboard.vue'),
   },
+  {
+    path: '/admin/user-management',
+    component: () => import('src/pages/Admin/user-management.vue'),
+  },
 ];
 
 export default routes;
