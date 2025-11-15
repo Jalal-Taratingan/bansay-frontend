@@ -11,13 +11,39 @@
           <h1>Login</h1>
 
           <div class="input-box">
-            <input v-model="username" type="text" placeholder="Username" required />
-            <q-icon name="mdi-account" class="icon" />
+            <q-input
+              filled
+              v-model="username"
+              label="Username"
+              placeholder="Enter your username"
+              color="indigo"
+              bg-color="indigo-2"
+              dense
+              clearable
+              :rules="[(val) => !!val || 'Username is required']"
+            >
+              <template v-slot:append>
+                <q-icon name="mdi-account" color="indigo" />
+              </template>
+            </q-input>
           </div>
 
           <div class="input-box">
-            <input v-model="password" type="password" placeholder="Password" required />
-            <q-icon name="mdi-lock" class="icon" />
+            <q-input
+              filled
+              v-model="password"
+              label="Password"
+              placeholder="password"
+              color="indigo"
+              bg-color="indigo-2"
+              dense
+              clearable
+              :rules="[(val) => !!val || 'Password is required']"
+            >
+              <template v-slot:append>
+                <q-icon name="mdi-account" color="indigo" />
+              </template>
+            </q-input>
           </div>
 
           <div class="input-box">
@@ -60,7 +86,21 @@
           <h1>Register</h1>
 
           <div class="input-box">
-            <input v-model="firstName" type="text" placeholder="First Name" required />
+            <q-input
+              filled
+              v-model="firstName"
+              label="First Name"
+              placeholder="Enter your first name"
+              color="indigo"
+              bg-color="indigo-2"
+              dense
+              clearable
+              :rules="[(val) => !!val || 'First Name is required']"
+            >
+              <template v-slot:append>
+                <q-icon name="mdi-account" color="indigo" />
+              </template>
+            </q-input>
           </div>
 
           <div class="input-box">
