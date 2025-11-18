@@ -2,7 +2,7 @@
   <q-page class="bg-grey-2 flex flex-center">
     <div class="container">
       <div class="form-box login" :class="{ active: isLogin }">
-        <form>
+        <q-form @submit="login">
           <div class="logo-header">
             <img :src="logo" alt="Bansay Logo" class="logo" />
             <h2 class="app-title">Bansay App</h2>
@@ -10,12 +10,12 @@
 
           <h1>Login</h1>
           <div class="input-box">
-            <input type="text" placeholder="Username" required />
+            <input type="text" placeholder="Username" required v-model="loginUsername" />
             <i class="bx bxs-user"></i>
           </div>
 
           <div class="input-box">
-            <input type="password" placeholder="Password" required />
+            <input type="password" placeholder="Password" required v-model="loginPassword" />
             <i class="bx bxs-lock"></i>
           </div>
 
@@ -35,7 +35,7 @@
             <a href="#"><i class="bx bxl-github"></i></a>
             <a href="#"><i class="bx bxl-linkedin"></i></a>
           </div>
-        </form>
+        </q-form>
       </div>
 
       <div class="form-box register" :class="{ active: !isLogin }">
@@ -118,6 +118,8 @@ import logo from 'src/assets/logo.png';
 import 'boxicons/css/boxicons.min.css';
 import { useAuthStore } from 'src/stores/auth-store';
 import { type UserRegisterDtoRoleEnum } from 'src/services/sdk';
+const loginUsername = ref('');
+const loginPassword = ref('');
 
 const authStore = useAuthStore();
 const isLogin = ref(true);
@@ -142,6 +144,13 @@ watch([password, confirmPassword], () => {
     passwordError.value = '';
   }
 });
+async function login() {
+  const user = await authStore.login({
+    username: loginUsername.value,
+    password: loginPassword.value,
+  });
+  console.log(user);
+}
 
 async function register() {
   await authStore.register({
