@@ -11,7 +11,7 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <div class="q-pa-md">
         <h6>Menu</h6>
-        <div>pwede mag lagay ng choices dito</div>
+        <div>Ako nalang dito.</div>
       </div>
     </q-drawer>
 
