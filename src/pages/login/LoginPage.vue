@@ -55,7 +55,7 @@
         <q-btn type="submit" color="indigo" label="Login" class="full-width" />
 
         <p>
-          Don’t have an account?
+          Don't have an account?
           <router-link to="/register">Register</router-link>
         </p>
         <p>Or login with</p>
