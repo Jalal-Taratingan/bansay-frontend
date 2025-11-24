@@ -9,6 +9,6 @@ import { onMounted } from 'vue';
 const authStore = useAuthStore();
 
 onMounted(() => {
-  authStore.fetchCurrentUser();
+  void authStore.fetchCurrentUser();
 });
 </script>
