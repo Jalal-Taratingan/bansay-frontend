@@ -3,7 +3,6 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('src/pages/Auth/LoginRegister.vue') },
       {
         path: '/student-dashboard',
         component: () => import('src/pages/Students/StudentDashboard.vue'),
@@ -12,15 +11,22 @@ const routes = [
         path: '/officer-dashboard',
         component: () => import('src/pages/Officer/OfficerDashboard.vue'),
       },
-
     ],
   },
+
+  {
+    path: '/login',
+    component: () => import('layouts/AuthLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/Auth/LoginRegister.vue') }],
+  },
+
   {
     path: '/admin',
     component: () => import('layouts/AdminLayout.vue'),
     children: [
       {
-        path: '', name: 'admin-dashboard',
+        path: '',
+        name: 'admin-dashboard',
         component: () => import('src/pages/Admin/AdminDashboard.vue'),
       },
       {
@@ -29,11 +35,10 @@ const routes = [
       },
       {
         path: 'pending-approvals',
-        component: () => import('src/pages/Admin/PendingApprovalPage.vue')
+        component: () => import('src/pages/Admin/PendingApprovalPage.vue'),
       },
     ],
   },
-
 ];
 
 export default routes;
