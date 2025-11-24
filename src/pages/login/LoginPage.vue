@@ -158,6 +158,6 @@ export default defineComponent({
       }*/
     };
     return { logo, username, password, selectedRole, roles, loginForm, handleLogin };
-  }
-})
+  },
+});
 </script>

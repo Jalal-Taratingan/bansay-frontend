@@ -35,7 +35,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
   // Redirect unauthenticated users to login page.
   Router.beforeEach((to, from, next) => {
-    const publicPages = ['/login'];
+    const publicPages = ['/login', '/register'];
     const authRequired = !publicPages.includes(to.path);
     const token = localStorage.getItem('token');
 
