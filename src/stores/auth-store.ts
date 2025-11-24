@@ -12,10 +12,17 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    initialize() {
-      const user = localStorage.getItem('user');
-      if (user) {
-        this.currentUser = JSON.parse(user);
+    async fetchCurrentUser() {
+      // Fetch user data from backend instead of localStorage for data privacy
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        try {
+          const user = await BansayService.getInstance().getCurrentUser();
+          this.currentUser = user as unknown as UserInfoDto;
+        } catch (error) {
+          console.error('Failed to fetch current user:', error);
+          this.currentUser = null;
+        }
       }
     },
 

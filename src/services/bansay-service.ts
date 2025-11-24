@@ -21,9 +21,8 @@ export class BansayService {
       if (response.data.accessToken) {
         localStorage.setItem('accessToken', response.data.accessToken);
       }
-      if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
+      // User data is NOT stored in localStorage for data privacy
+      // Use getCurrentUser() to fetch user data when needed
       return response.data;
     } else {
       throw new Error(response.statusText || "Bad Request");
@@ -45,9 +44,17 @@ export class BansayService {
     }
   }
 
+  async getCurrentUser() {
+    const response = await this.authApi.authControllerGetMe();
+    if (response.status == 200) {
+      return response.data;
+    } else {
+      throw new Error(response.statusText || "Failed to get current user");
+    }
+  }
+
   logout() {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
   }
 }
 
