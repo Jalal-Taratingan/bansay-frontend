@@ -10,47 +10,109 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'login',
         component: () => import('pages/login/LoginPage.vue'),
+        name: 'login',
       },
       {
         path: 'register',
         component: () => import('pages/register/RegisterPage.vue'),
+        name: 'register',
       },
 
-      {
-        path: 'student-dashboard',
-        component: () => import('pages/student/StudentDashboard.vue'),
-      },
-      {
-        path: 'officer-dashboard',
-        component: () => import('pages/Officer/OfficerDashboard.vue'),
-      },
+      // These dashboard routes are redundant and removed to avoid conflict:
+      // { path: 'student-dashboard', component: () => import('pages/student/StudentDashboard.vue') },
+      // { path: 'officer-dashboard', component: () => import('pages/Officer/OfficerDashboard.vue') },
       {
         path: 'admin-dashboard',
         component: () => import('pages/Admin/AdminDashboard.vue'),
+        name: 'admin-dashboard', // Added name for clarity/redirection
       },
     ],
   },
+
+  // =================================================================
+  // STUDENT ROUTES (Fixed to support layout links)
+  // =================================================================
+  {
+    path: '/student',
+    component: () => import('pages/student/StudentDashboard.vue'),
+    children: [
+      {
+        path: '',
+        name: 'student-dashboard',
+        component: () => import('pages/student/LiabilitiesSummary.vue'), // Placeholder
+      },
+      {
+        path: 'appeal',
+        name: 'appeal-submission',
+        component: () => import('pages/student/AppealSubmissionPage.vue'), // Placeholder
+      },
+      {
+        path: 'settle',
+        name: 'settle-payment',
+        component: () => import('pages/student/SettlePaymentPage.vue'), // Placeholder
+      },
+    ],
+  },
+
+  // =================================================================
+  // OFFICER ROUTES (NEW: Added OfficerLayout.vue)
+  // =================================================================
+  {
+    path: '/officer',
+    component: () => import('layouts/OfficerLayout.vue'), // << New Officer Layout
+    children: [
+      {
+        path: '',
+        name: 'officer-dashboard',
+        component: () => import('pages/Officer/OfficerDashboard.vue'),
+      },
+      {
+        path: 'manage',
+        name: 'liability-management',
+        component: () => import('pages/Officer/LiabilityManagementPage.vue'), // Placeholder
+      },
+      {
+        path: 'appeals',
+        name: 'appeal-review',
+        component: () => import('pages/Officer/AppealReviewPage.vue'), // Placeholder
+      },
+      {
+        path: 'verify',
+        name: 'payment-verification',
+        component: () => import('pages/Officer/PaymentVerificationPage.vue'), // Placeholder
+      },
+      {
+        path: 'reports',
+        name: 'officer-reports',
+        component: () => import('pages/Officer/ReportsPage.vue'), // Placeholder
+      },
+    ],
+  },
+
+  // =================================================================
+  // ADMIN ROUTES (Existing Structure - Added name for consistency)
+  // =================================================================
   {
     path: '/admin',
     component: () => import('layouts/AdminLayout.vue'),
     children: [
       {
         path: '',
-        component: () => import('pages/Admin/AdminDashboard.vue')
+        name: 'admin-dashboard',
+        component: () => import('pages/Admin/AdminDashboard.vue'),
       },
       {
         path: 'users',
         name: 'user-management',
-        component: () => import('pages/Admin/UserManagementPage.vue')
-      }
-    ]
+        component: () => import('pages/Admin/UserManagementPage.vue'),
+      },
+    ],
   },
 
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-
 ];
 
 export default routes;
