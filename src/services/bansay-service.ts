@@ -67,7 +67,7 @@ export class BansayService {
     const response = await this.authApi.authControllerRegister(data);
     if (response.status == 201 || response.status == 200) {
       if (response.data.user) {
-        // Note: Register might not return a token depending on backend implementation, 
+        // Note: Register might not return a token depending on backend implementation,
         // but if it does or if we want to auto-login, we'd handle it here.
         // The current backend register response seems to only return the user.
         // If auto-login is needed after register, we might need to call login or backend needs to return token.
@@ -91,7 +91,7 @@ export class BansayService {
   logout() {
     localStorage.removeItem('accessToken');
   }
-}
+
 
   // liability services
 
