@@ -1,15 +1,12 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { BansayService } from 'src/services/bansay-service';
-import type { UserInfoDto, UserLoginDto, UserRegisterDto } from 'src/services/sdk';
 import type { UserLoginDto, UserRegisterDto, UserInfoDto } from 'src/services/sdk';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    currentUser: null as UserInfoDto | null,
     currentUser: null as UserInfoDto | null
   }),
 
-  getters: {},
   getters: {
     isAuthenticated: (state) => !!state.currentUser,
   },
@@ -30,14 +27,6 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async login(payload: UserLoginDto) {
-      const response = await BansayService.getInstance().loginUser(payload);
-
-      // Save access token to localStorage.
-      localStorage.setItem('token', response.accessToken);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      this.currentUser = response.user;
-
-      return response;
       const response = await BansayService.getInstance().loginUser(payload);
       if (response.user) {
         this.currentUser = response.user;

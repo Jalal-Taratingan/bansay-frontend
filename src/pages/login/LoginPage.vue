@@ -120,9 +120,6 @@ export default defineComponent({
         });
       }
     };
-    return { logo, username, password, selectedRole, roles, loginForm, handleLogin };
-  },
-});
 
     return { logo, username, password, loginForm, handleLogin };
   },
