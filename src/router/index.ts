@@ -6,6 +6,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
+import { useAuthStore } from 'src/stores/auth-store';
 
 /*
  * If not building with SSR mode, you can
@@ -19,7 +20,9 @@ import routes from './routes';
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory;
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -29,6 +32,35 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  Router.beforeEach(async (to, from, next) => {
+    const auth = useAuthStore();
+
+    if (!auth.currentUser) {
+      try {
+        await auth.fetchCurrentUser();
+      } catch (error) {
+        // ignore errors
+        void error;
+      }
+    }
+
+    const userRole = auth.currentUser?.role;
+    const requiresAuth = to.meta?.requiresAuth;
+    const allowedRoles = to.meta?.roles as string[] | undefined;
+
+    // Redirect unauthenticated user to login page.
+    if (requiresAuth && !auth.isAuthenticated) {
+      return next('/login');
+    }
+
+    // Shows not authorized page for not authorized users.
+    if (requiresAuth && allowedRoles && !allowedRoles.includes(userRole!)) {
+      return next('/not-authorized');
+    }
+
+    next();
   });
 
   return Router;

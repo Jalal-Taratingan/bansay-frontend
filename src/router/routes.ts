@@ -19,38 +19,46 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'student-dashboard',
         component: () => import('pages/student/StudentDashboard.vue'),
+        meta: { requiresAuth: true, roles: ['Student'] },
       },
       {
         path: 'officer-dashboard',
         component: () => import('pages/Officer/OfficerDashboard.vue'),
+        meta: { requiresAuth: true, roles: ['Officer'] },
       },
       {
         path: 'admin-dashboard',
         component: () => import('pages/Admin/AdminDashboard.vue'),
+        meta: { requiresAuth: true, roles: ['Admin'] },
       },
     ],
   },
   {
     path: '/admin',
     component: () => import('layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true, roles: ['Admin'] },
     children: [
       {
         path: '',
-        component: () => import('pages/Admin/AdminDashboard.vue')
+        component: () => import('pages/Admin/AdminDashboard.vue'),
       },
       {
         path: 'users',
         name: 'user-management',
-        component: () => import('pages/Admin/UserManagementPage.vue')
-      }
-    ]
+        component: () => import('pages/Admin/UserManagementPage.vue'),
+      },
+    ],
+  },
+
+  {
+    path: '/not-authorized',
+    component: () => import('pages/NotAuthorized.vue'),
   },
 
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-
 ];
 
 export default routes;
