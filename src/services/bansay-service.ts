@@ -4,7 +4,6 @@ import {
   UserApi,
   type UserLoginDto,
   type UserRegisterDto,
-  type UserInfoDto,
   type CreateLiabilityDto,
   type Liability,
   type MyLiabilitiesResponseDto,
@@ -29,12 +28,13 @@ export interface UpdateLiabilityDto {
 }
 
 export interface PendingUser {
+  id?: number;
   username: string;
   firstName: string;
   lastName: string;
   email: string;
-  role: 'Admin' | 'Officer' | 'Student';
-  status: 'Pending' | 'Active' | 'Deactivated';
+  role: UserControllerGetUsersRoleEnum;
+  status: UserControllerGetUsersStatusEnum;
 }
 
 const isDevEnv = process.env.NODE_ENV == 'development';
@@ -172,18 +172,17 @@ export class BansayService {
     }
   }
 
-   // Get users with filters (admin only)
+  // Get users with filters (admin only)
   async getUsers(
     status?: UserControllerGetUsersStatusEnum,
     role?: UserControllerGetUsersRoleEnum
-  ): Promise<UserInfoDto[]> { // Changed return type
+  ): Promise<PendingUser[]> {
     const response = await this.userApi.userControllerGetUsers(status, role);
-    return response.data;
+    return (response as unknown as { data: PendingUser[] }).data;
   }
 
-
   // Approve/patch user (admin only)
-  async patchUser(userId: string, data: Partial<{ status: 'Pending' | 'Active' | 'Deactivated' }>) {
+  async patchUser(userId: string, data: object) {
     const response = await this.userApi.userControllerPatchUser(String(userId), data);
     if (response.status === 200) {
       return response.data;

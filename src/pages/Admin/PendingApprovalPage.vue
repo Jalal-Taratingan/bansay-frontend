@@ -56,9 +56,8 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { BansayService } from 'src/services/bansay-service';
-import { type UserInfoDto } from 'src/services/sdk';
-
-const pendingUsers = ref<UserInfoDto[]>([]); // ADD THIS
+import type { PendingUser } from 'src/services/bansay-service';
+const pendingUsers = ref<PendingUser[]>([]);
 const $q = useQuasar();
 const loading = ref(false);
 const approvingUserId = ref<string | null>(null);
@@ -72,7 +71,7 @@ const fetchPendingUsers = async () => {
   loading.value = true;
   try {
     const result = await BansayService.getInstance().getUsers('Pending');
-    pendingUsers.value = result; // Assign to pendingUsers
+    pendingUsers.value = (result as unknown as { data: PendingUser[] }).data;
   } catch (err) {
     console.error('Failed to fetch pending users:', err);
     $q.notify({
@@ -88,10 +87,8 @@ const fetchPendingUsers = async () => {
 const approveUser = async (userId: string) => {
   approvingUserId.value = userId;
   try {
-    console.log('Approving user ID:', userId); // Check what ID we're sending
-    console.log('Type of userId:', typeof userId); // Check the type
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const result = await BansayService.getInstance().patchUser(String(userId), { status: 'Active' });
-    console.log('Approve result:', result); // ADD THIS
 
     $q.notify({
       type: 'positive',
@@ -101,7 +98,7 @@ const approveUser = async (userId: string) => {
 
     await fetchPendingUsers();
   } catch (err) {
-    console.error('Failed to approve user:', err); // This should show the actual error
+    console.error('Failed to approve user:', err);
     $q.notify({
       type: 'negative',
       message: 'Failed to approve user',
