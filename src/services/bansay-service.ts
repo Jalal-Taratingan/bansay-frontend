@@ -24,9 +24,11 @@ export interface UpdateLiabilityDto {
   dueDate?: string;
 }
 
-const isDevEnv = process.env.ENV == 'development';
-const baseUrl: string = isDevEnv ? 'http://localhost:3030' :
-  'https://6f12ecy5s4.execute-api.us-east-2.amazonaws.com/prod';
+const baseUrl = 'http://localhost:3030';
+
+// const isDevEnv = process.env.ENV == 'development';
+// const baseUrl: string = isDevEnv ? 'http://localhost:3030' :
+//   'https://6f12ecy5s4.execute-api.us-east-2.amazonaws.com/prod';
 
 export class BansayService {
   private static instance?: BansayService;
@@ -59,7 +61,7 @@ export class BansayService {
       // Use getCurrentUser() to fetch user data when needed
       return response.data;
     } else {
-      throw new Error(response.statusText || "Bad Request");
+      throw new Error(response.statusText || 'Bad Request');
     }
   }
 
@@ -75,7 +77,7 @@ export class BansayService {
       }
       return response.data;
     } else {
-      throw new Error(response.statusText || "Bad Request");
+      throw new Error(response.statusText || 'Bad Request');
     }
   }
 
@@ -84,14 +86,13 @@ export class BansayService {
     if (response.status == 200) {
       return response.data;
     } else {
-      throw new Error(response.statusText || "Failed to get current user");
+      throw new Error(response.statusText || 'Failed to get current user');
     }
   }
 
   logout() {
     localStorage.removeItem('accessToken');
   }
-
 
   // liability services
 
@@ -119,7 +120,7 @@ export class BansayService {
       query?.status,
       query?.studentUsername,
       query?.sortBy,
-      query?.sortOrder
+      query?.sortOrder,
     );
     if (response.status === 200) {
       return response.data;
