@@ -47,6 +47,7 @@ export class BansayService {
   private authApi = new AuthApi({
     basePath: baseUrl,
     isJsonMime: () => true,
+    accessToken: () => localStorage.getItem('accessToken') || '',
   });
 
   private liabilityApi = new LiabilityApi({
@@ -78,7 +79,7 @@ export class BansayService {
       // Use getCurrentUser() to fetch user data when needed
       return response.data;
     } else {
-      throw new Error(response.statusText || "Bad Request");
+      throw new Error(response.statusText || 'Bad Request');
     }
   }
 
@@ -94,7 +95,7 @@ export class BansayService {
       }
       return response.data;
     } else {
-      throw new Error(response.statusText || "Bad Request");
+      throw new Error(response.statusText || 'Bad Request');
     }
   }
 
