@@ -156,76 +156,62 @@
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
-import '../../assets/styles/auth.css';
+<script lang="ts" setup>
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { QBtn, QForm } from 'quasar';
 import logo from '../../assets/logo.png';
+import { useAuthStore } from 'src/stores/auth-store';
+import { UserRegisterDtoRoleEnum } from 'src/services/sdk';
 
-export default defineComponent({
-  name: 'RegisterPage',
-  components: { QBtn, QForm },
-  setup() {
-    const router = useRouter();
+const router = useRouter();
+const authStore = useAuthStore();
 
-    const firstName = ref('');
-    const lastName = ref('');
-    const username = ref('');
-    const email = ref('');
-    const password = ref('');
-    const confirmPassword = ref('');
-    const selectedRole = ref(null);
-    const passwordError = ref('');
-    const registerForm = ref<QForm | null>(null);
+const firstName = ref('');
+const lastName = ref('');
 
-    const roles = [
-      { label: 'Student', value: 'student' },
-      { label: 'Officer', value: 'officer' },
-      { label: 'Admin', value: 'admin' },
-    ];
+const email = ref('');
+const username = ref('');
+const selectedRole = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const passwordError = ref('');
+const registerForm = ref<QForm | null>(null);
 
-    const handleRegister = async () => {
-      const valid = await registerForm.value?.validate();
-      if (valid !== true) return;
+const roles = [
+  { label: 'Student', value: UserRegisterDtoRoleEnum.Student },
+  { label: 'Officer', value: UserRegisterDtoRoleEnum.Officer },
+  { label: 'Admin', value: UserRegisterDtoRoleEnum.Admin },
+];
 
-      if (password.value !== confirmPassword.value) {
-        passwordError.value = 'Passwords do not match';
-        return;
-      }
-
-      if (!selectedRole.value) {
-        alert('Please select a role.');
-        return;
-      }
-
-      if (selectedRole.value === 'student') void router.push('/student-dashboard');
-      else if (selectedRole.value === 'officer') void router.push('/officer-dashboard');
-      else if (selectedRole.value === 'admin') void router.push('/admin-dashboard');
-    };
-
-    watch([password, confirmPassword], () => {
-      if (confirmPassword.value && password.value !== confirmPassword.value) {
-        passwordError.value = 'Passwords do not match';
-      } else {
-        passwordError.value = '';
-      }
-    });
-
-    return {
-      logo,
-      firstName,
-      lastName,
-      username,
-      email,
-      password,
-      confirmPassword,
-      selectedRole,
-      passwordError,
-      roles,
-      registerForm,
-      handleRegister,
-    };
-  },
+watch([password, confirmPassword], () => {
+  if (confirmPassword.value && password.value !== confirmPassword.value) {
+    passwordError.value = 'Passwords do not match';
+  } else {
+    passwordError.value = '';
+  }
 });
+
+async function handleRegister() {
+  if (password.value !== confirmPassword.value) {
+    passwordError.value = 'Passwords do not match';
+    return;
+  }
+
+  await authStore.register({
+    firstName: firstName.value,
+    lastName: lastName.value,
+    email: email.value,
+    password: password.value,
+    role: selectedRole.value as UserRegisterDtoRoleEnum,
+    username: username.value,
+  });
+
+  if (selectedRole.value === UserRegisterDtoRoleEnum.Student)
+    void router.push('/Student-Dashboard');
+  else if (selectedRole.value === UserRegisterDtoRoleEnum.Officer)
+    void router.push('/Officer-Dashboard');
+  else if (selectedRole.value === UserRegisterDtoRoleEnum.Admin)
+    void router.push('/Admin-Dashboard');
+}
 </script>
