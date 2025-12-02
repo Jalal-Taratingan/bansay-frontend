@@ -36,9 +36,9 @@
       </div>
 
       <div class="col-12 col-sm-6 col-md-4">
-        <q-card class="my-card bg-white text-primary shadow-2">
+        <q-card class="my-card bg-white text-primary shadow-2" clickable @click="router.push('/admin-dashboard/pending-approval')">
           <q-card-section>
-            <div class="text-h6 text-grey-8">Pending Appeals</div>
+            <div class="text-h6 text-grey-8">Pending Approvals</div>
             <div class="text-h3 text-weight-bolder text-orange-8 q-mt-sm">18</div>
           </q-card-section>
           <q-card-section class="row items-center justify-end q-pt-none">
@@ -114,6 +114,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useQuasar, type QTableColumn } from 'quasar';
+import { useRouter } from 'vue-router';
 
 // --- DATA TYPES ---
 interface User {
@@ -126,9 +127,8 @@ interface User {
 
 // --- VARIABLES ---
 const $q = useQuasar();
-const filter = ref(''); // For the search bar
-
-// REMOVED: "leftDrawerOpen" and "toggleLeftDrawer" (MainLayout handles this now!)
+const router = useRouter();
+const filter = ref('');
 
 // --- TABLE CONFIG ---
 const columns: QTableColumn[] = [
@@ -178,6 +178,7 @@ function deactivateUser(row: User) {
 <style scoped>
 .my-card {
   transition: transform 0.3s;
+  cursor: pointer;
 }
 .my-card:hover {
   transform: translateY(-5px);
