@@ -26,7 +26,7 @@ export interface UpdateLiabilityDto {
 
 const isDevEnv = process.env.NODE_ENV == 'development';
 const baseUrl: string = isDevEnv ? 'http://localhost:3030' :
-'https://6f12ecy5s4.execute-api.us-east-2.amazonaws.com/prod';
+  'https://6f12ecy5s4.execute-api.us-east-2.amazonaws.com/prod';
 
 export class BansayService {
   private static instance?: BansayService;
@@ -34,6 +34,7 @@ export class BansayService {
   private authApi = new AuthApi({
     basePath: baseUrl,
     isJsonMime: () => true,
+    accessToken: () => localStorage.getItem('accessToken') || '',
   });
 
   private liabilityApi = new LiabilityApi({
