@@ -105,18 +105,90 @@
 
     <q-dialog v-model="showAddLiabilityDialog">
       <q-card style="width: 700px; max-width: 80vw">
-        <q-card-section>
-          <div class="text-h6">Add New Liability Form</div>
+        <q-card-section class="bg-primary text-white">
+          <div class="text-h6">Create New Student Liability</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <p>Form to create a new liability record will be implemented here (Sprint 3).</p>
-        </q-card-section>
+        <q-form @submit.prevent="saveNewLiability">
+          <q-card-section class="q-pt-none q-gutter-md">
+            <q-input
+              v-model="newLiability.studentUsername"
+              label="Student ID (Username)"
+              required
+              filled
+              hint="e.g., S12345. Use the official student username."
+            />
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" v-close-popup />
-          <q-btn label="Save Liability" color="green" disabled />
-        </q-card-actions>
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="newLiability.type"
+                  :options="['tuition', 'fee', 'fine', 'other']"
+                  label="Liability Type"
+                  required
+                  filled
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model.number="newLiability.amount"
+                  label="Amount (₱)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  required
+                  filled
+                />
+              </div>
+            </div>
+
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="newLiability.status"
+                  :options="['Unpaid', 'Paid', 'Cancelled']"
+                  label="Initial Status"
+                  required
+                  filled
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="newLiability.dueDate"
+                  label="Due Date"
+                  type="date"
+                  mask="date"
+                  required
+                  filled
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                        <q-date v-model="newLiability.dueDate" mask="YYYY-MM-DD" />
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+            </div>
+
+            <q-input
+              v-model="newLiability.details"
+              label="Description / Details"
+              type="textarea"
+              rows="3"
+              filled
+              hint="Provide clear details regarding the reason for this liability (e.g., 'Laboratory Fee - Spring 2025')."
+            />
+          </q-card-section>
+
+          <q-card-actions align="right" class="q-pa-md">
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn label="Save Liability" color="green" type="submit" :loading="isSaving" />
+          </q-card-actions>
+        </q-form>
       </q-card>
     </q-dialog>
   </q-page>
@@ -134,12 +206,7 @@ import type {
   LiabilityControllerFindAllSortOrderEnum,
 } from 'src/services/sdk';
 
-// --- TYPE DEFINITIONS FOR FIXING ERRORS ---
-// FIX: Define the parameter type for onRequest using the correct utility type
-type RequestProp = NonNullable<Parameters<NonNullable<QTableProps['onRequest']>>[0]>;
-
-// FIX: Define the required structure for manual onRequest calls
-type MinimalRequestProps = Pick<RequestProp, 'pagination' | 'getCellValue'> & { filter?: unknown };
+// --- TYPE DEFINITIONS ---
 
 // Define the precise type for the columns array
 const columns: QTableProps['columns'] = [
@@ -180,6 +247,30 @@ const columns: QTableProps['columns'] = [
   { name: 'actions', label: 'Actions', align: 'center', field: 'actions' },
 ];
 
+// Define types for QTable onRequest props and minimal request props
+type RequestProp = NonNullable<Parameters<NonNullable<QTableProps['onRequest']>>[0]>;
+type MinimalRequestProps = Pick<RequestProp, 'pagination' | 'getCellValue'> & { filter?: unknown };
+
+// NEW: Interface for the new liability form data (matches required API payload)
+interface NewLiabilityForm {
+  studentUsername: string;
+  type: string; // e.g., 'tuition', 'fine'
+  amount: number;
+  dueDate: string; // YYYY-MM-DD
+  status: 'Unpaid' | 'Paid' | 'Cancelled';
+  details: string;
+}
+
+// Initial state for the new liability form
+const initialNewLiability: NewLiabilityForm = {
+  studentUsername: '',
+  type: 'tuition',
+  amount: 0,
+  dueDate: '',
+  status: 'Unpaid',
+  details: '',
+};
+
 export default defineComponent({
   name: 'LiabilityManagementPage',
   setup() {
@@ -195,7 +286,11 @@ export default defineComponent({
 
     const showAddLiabilityDialog = ref(false);
 
-    // State for pagination (Must be number for rowsNumber)
+    // NEW: State for the New Liability Form
+    const newLiability = ref<NewLiabilityForm>({ ...initialNewLiability });
+    const isSaving = ref(false);
+
+    // State for pagination
     const pagination = ref({
       sortBy: 'createdAt',
       descending: true,
@@ -221,56 +316,67 @@ export default defineComponent({
         status: statusFilterValue as LiabilityControllerFindAllStatusEnum | undefined,
       };
 
-      liabilityStore
-        .fetchAllLiabilities(queryParams)
-        .then(() => {
-          // Handle total count update if API provides it
-        })
-        .catch((error) => {
-          $q.notify({
-            type: 'negative',
-            message: 'Failed to load liabilities.',
-            caption: error.message,
-          });
-        });
+      // Call the store action to fetch data (Sprint 3)
+      // liabilityStore.fetchAllLiabilities(queryParams)
+      console.log('Fetching liabilities with params:', queryParams);
     };
 
-    // Handler for Q-Table request (pagination and sorting)
     const onRequest: QTableProps['onRequest'] = (props) => {
-      // FIX 1: Use spread operator and nullish coalescence to safely update pagination.
-      // This ensures the strict 'rowsNumber: number' property is always satisfied.
       pagination.value = {
         ...(props.pagination || {}),
         rowsNumber: props.pagination?.rowsNumber || pagination.value.rowsNumber,
       };
-
       fetchLiabilities(props);
     };
 
-    // Handler for manual filter changes (FIX for Error 2)
     const handleFilterChange = () => {
       pagination.value.page = 1;
 
-      // FIX for Errors 2 & 3: Create the minimal required properties object
       const minimalProps: MinimalRequestProps = {
         pagination: pagination.value,
         getCellValue: () => null,
       };
 
-      // Use the proper Quasar type for the call
       onRequest(minimalProps as RequestProp);
     };
 
-    // Actions for buttons (Placeholder for future implementation)
     const editLiability = (liability: Liability) => {
       $q.notify({ message: `Editing Liability ID: ${liability.id}` });
+      // TODO: Populate a form with liability data (Sprint 3)
     };
 
     const markAsPaid = (liability: Liability) => {
       $q.notify({ message: `Marking Liability ID: ${liability.id} as Paid (TODO: API Call)` });
+      // TODO: Implement API call to update status (Sprint 3)
     };
 
-    // Fetch initial data on component load (FIX for Error 3)
+    // NEW: Function to handle form submission
+    const saveNewLiability = () => {
+      isSaving.value = true;
+
+      // TODO: 1. Input Validation (e.g., check amount > 0)
+
+      // TODO: 2. CALL API (POST /liabilities)
+      console.log('Attempting to save new liability:', newLiability.value);
+
+      // Mock API call success/failure
+      setTimeout(() => {
+        isSaving.value = false;
+        $q.notify({
+          type: 'positive',
+          message: `Liability for ${newLiability.value.studentUsername} created successfully.`,
+        });
+
+        // 3. Reset state and close dialog
+        newLiability.value = { ...initialNewLiability };
+        showAddLiabilityDialog.value = false;
+
+        // 4. Refresh table data
+        handleFilterChange();
+      }, 1500);
+    };
+
+    // Fetch initial data on component load
     onMounted(() => {
       const minimalProps: MinimalRequestProps = {
         pagination: pagination.value,
@@ -293,6 +399,11 @@ export default defineComponent({
       editLiability,
       markAsPaid,
       showAddLiabilityDialog,
+
+      // NEW return properties
+      newLiability,
+      saveNewLiability,
+      isSaving,
     };
   },
 });
