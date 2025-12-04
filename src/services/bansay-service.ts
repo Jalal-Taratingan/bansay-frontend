@@ -48,6 +48,7 @@ export class BansayService {
   private authApi = new AuthApi({
     basePath: baseUrl,
     isJsonMime: () => true,
+    accessToken: () => localStorage.getItem('accessToken') || '',
   });
 
   private liabilityApi = new LiabilityApi({
