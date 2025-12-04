@@ -1,6 +1,9 @@
 import {
   AuthApi,
   LiabilityApi,
+  UserApi,
+  type UserControllerGetUsersStatusEnum,
+  type UserControllerGetUsersRoleEnum,
   type UserLoginDto,
   type UserRegisterDto,
   type CreateLiabilityDto,
@@ -8,6 +11,7 @@ import {
   type MyLiabilitiesResponseDto,
   type LiabilityControllerFindAllStatusEnum,
   type LiabilityControllerFindAllSortOrderEnum,
+  type User,
 } from './sdk';
 
 export interface QueryLiabilityParams {
@@ -24,11 +28,19 @@ export interface UpdateLiabilityDto {
   dueDate?: string;
 }
 
-const baseUrl = 'http://localhost:3030';
+export interface UserApiResponse {
+  data: {
+    data: User[];
+    count: number;
+  };
+  status: number;
+  statusText: string;
+}
 
-// const isDevEnv = process.env.ENV == 'development';
-// const baseUrl: string = isDevEnv ? 'http://localhost:3030' :
-//   'https://6f12ecy5s4.execute-api.us-east-2.amazonaws.com/prod';
+const isDevEnv = process.env.ENV == 'development';
+const baseUrl: string = isDevEnv
+  ? 'http://localhost:3030'
+  : 'https://6f12ecy5s4.execute-api.us-east-2.amazonaws.com/prod';
 
 export class BansayService {
   private static instance?: BansayService;
@@ -42,6 +54,12 @@ export class BansayService {
     basePath: baseUrl,
     isJsonMime: () => true,
     accessToken: () => localStorage.getItem('accessToken') || '', //needs local storage token for auth
+  });
+
+  private userApi = new UserApi({
+    basePath: baseUrl,
+    isJsonMime: () => true,
+    accessToken: () => localStorage.getItem('accessToken') || '',
   });
 
   static getInstance() {
@@ -151,6 +169,27 @@ export class BansayService {
     const response = await this.liabilityApi.liabilityControllerSoftDelete(String(id));
     if (response.status !== 204 && response.status !== 200) {
       throw new Error(response.statusText || 'Failed to delete liability');
+    }
+  }
+
+  // Users services
+
+  // Users: Get the list of users
+  async getAllUsers(
+    status?: UserControllerGetUsersStatusEnum,
+    role?: UserControllerGetUsersRoleEnum,
+  ): Promise<User[]> {
+    try {
+      const response = (await this.userApi.userControllerGetUsers(
+        status,
+        role,
+      )) as unknown as UserApiResponse;
+      const users = response.data.data ?? [];
+
+      return users;
+    } catch (err) {
+      console.error('Failed to fetch users', err);
+      return [];
     }
   }
 }
