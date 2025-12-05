@@ -104,7 +104,7 @@ export default defineComponent({
         } else if (role === 'Officer') {
           await router.push('/officer-dashboard');
         } else if (role === 'Admin') {
-          await router.push('/admin-dashboard');
+          await router.push('/admin');
         } else {
           // Fallback if role doesn't match or is missing
           void router.push('/');
