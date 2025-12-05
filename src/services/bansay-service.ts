@@ -1,6 +1,7 @@
 import {
   AuthApi,
   LiabilityApi,
+  UserApi,
   type UserLoginDto,
   type UserRegisterDto,
   type CreateLiabilityDto,
@@ -8,6 +9,8 @@ import {
   type MyLiabilitiesResponseDto,
   type LiabilityControllerFindAllStatusEnum,
   type LiabilityControllerFindAllSortOrderEnum,
+  type UserControllerGetUsersStatusEnum,
+  type UserControllerGetUsersRoleEnum,
 } from './sdk';
 
 export interface QueryLiabilityParams {
@@ -22,6 +25,16 @@ export interface UpdateLiabilityDto {
   type?: 'tuition' | 'fee' | 'fine' | 'other';
   amount?: number;
   dueDate?: string;
+}
+
+export interface PendingUser {
+  id?: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: UserControllerGetUsersRoleEnum;
+  status: UserControllerGetUsersStatusEnum;
 }
 
 const isDevEnv = process.env.NODE_ENV == 'development';
@@ -41,6 +54,12 @@ export class BansayService {
     basePath: baseUrl,
     isJsonMime: () => true,
     accessToken: () => localStorage.getItem('accessToken') || '', //needs local storage token for auth
+  });
+
+  private userApi = new UserApi({
+    basePath: baseUrl,
+    isJsonMime: () => true,
+    accessToken: () => localStorage.getItem('accessToken') || '',
   });
 
   static getInstance() {
@@ -129,8 +148,8 @@ export class BansayService {
   }
 
   // Officer/Admin: Get liability by ID
-  async getLiabilityById(id: number): Promise<Liability> {
-    const response = await this.liabilityApi.liabilityControllerFindOne(String(id));
+  async getLiabilityById(idNumber: string): Promise<Liability> {
+    const response = await this.liabilityApi.liabilityControllerFindOne(String(idNumber));
     if (response.status === 200) {
       return response.data;
     }
@@ -138,8 +157,8 @@ export class BansayService {
   }
 
   // Officer/Admin: Update liability
-  async updateLiability(id: number, data: UpdateLiabilityDto): Promise<Liability> {
-    const response = await this.liabilityApi.liabilityControllerUpdate(String(id), data);
+  async updateLiability(idNumber: string, data: UpdateLiabilityDto): Promise<Liability> {
+    const response = await this.liabilityApi.liabilityControllerUpdate(String(idNumber), data);
     if (response.status === 200) {
       return response.data;
     }
@@ -147,10 +166,28 @@ export class BansayService {
   }
 
   // Officer/Admin: Soft delete liability
-  async deleteLiability(id: number): Promise<void> {
-    const response = await this.liabilityApi.liabilityControllerSoftDelete(String(id));
+  async deleteLiability(idNumber: string): Promise<void> {
+    const response = await this.liabilityApi.liabilityControllerSoftDelete(String(idNumber));
     if (response.status !== 204 && response.status !== 200) {
       throw new Error(response.statusText || 'Failed to delete liability');
     }
+  }
+
+  // Get users with filters (admin only)
+  async getUsers(
+    status?: UserControllerGetUsersStatusEnum,
+    role?: UserControllerGetUsersRoleEnum
+  ): Promise<PendingUser[]> {
+    const response = await this.userApi.userControllerGetUsers(status, role);
+    return (response as unknown as { data: PendingUser[] }).data;
+  }
+
+  // Approve/patch user (admin only)
+  async patchUser(userId: string, data: object) {
+    const response = await this.userApi.userControllerPatchUser(String(userId), data);
+    if (response.status === 200) {
+      return response.data;
+    }
+    throw new Error(response.statusText || 'Failed to update user');
   }
 }
