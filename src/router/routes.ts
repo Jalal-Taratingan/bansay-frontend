@@ -87,6 +87,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'pending-approval',
+       name: 'pending-approval,
         component: () => import('pages/Admin/PendingApprovalPage.vue'),
       },
     ],

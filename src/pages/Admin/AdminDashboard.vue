@@ -36,7 +36,7 @@
       </div>
 
       <div class="col-12 col-sm-6 col-md-4">
-        <q-card class="my-card bg-white text-primary shadow-2" clickable @click="router.push('/admin-dashboard/pending-approval')">
+        <q-card class="my-card bg-white text-primary shadow-2" clickable @click="router.push({ name: 'pending-approval'})">
           <q-card-section>
             <div class="text-h6 text-grey-8">Pending Approvals</div>
             <div class="text-h3 text-weight-bolder text-orange-8 q-mt-sm">18</div>
