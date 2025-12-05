@@ -12,114 +12,108 @@
     <q-table
       :rows="liabilities"
       :columns="columns"
+      :loading="loading"
       row-key="id"
       flat
       bordered
       separator="horizontal"
     >
+      <template v-slot:body-cell-status="props">
+        <q-td :props="props">
+          <q-badge
+            :color="getStatusColor(props.row.status)"
+            :label="props.row.status"
+            class="text-uppercase"
+          />
+        </q-td>
+      </template>
+      <template v-slot:body-cell-amount="props">
+        <q-td :props="props">
+          {{ formatCurrency(props.row.amount) }}
+        </q-td>
+      </template>
       <template v-slot:body-cell-action="props">
         <q-td align="center">
-          <q-btn
-            v-if="props.row.status === 'unpaid'"
-            flat
-            color="green"
-            label="Mark as Paid"
-            @click="openMarkPaid(props.row)"
-          />
-          <q-btn v-if="props.row.status !== 'paid'" flat color="primary" label="File Appeal" />
+          <q-btn 
+            v-if="props.row.status !== 'Paid'" 
+            flat 
+            color="primary" 
+            label="File Appeal"
+            disable 
+          >
+            <q-tooltip>Appeal feature coming soon</q-tooltip>
+          </q-btn>
         </q-td>
       </template>
     </q-table>
-
-    <q-dialog v-model="showPaidModal">
-      <q-card style="width: 400px">
-        <q-card-section>
-          <div class="text-h6">Mark Liability as Paid</div>
-          <div class="text-body2 q-mt-sm">
-            This action will mark the selected liability as paid. Please ensure that the payment has
-            been settled.
-          </div>
-
-          <div class="q-mt-md">
-            <p><b>Type:</b> {{ selected?.type }}</p>
-            <p><b>Issuer:</b> {{ selected?.issuer }}</p>
-            <p><b>Amount:</b> {{ selected?.amount }}</p>
-          </div>
-
-          <div class="text-body2">
-            Are you sure you want to mark this liability as paid? This action indicates you have
-            settled this payment.
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Confirm Payment" color="green" @click="confirmPaid" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
-<script lang="ts">
-interface Liability {
-  id: number;
-  type: string;
-  issuer: string;
-  amount?: string;
-  status: string;
-  dueDate?: string;
-  remarks?: string;
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+import { BansayService } from 'src/services/bansay-service';
+import type { Liability } from 'src/services/sdk';
+
+const loading = ref(false);
+const liabilities = ref<Liability[]>([]);
+const totalOutstanding = ref(0);
+
+const columns = [
+  { name: 'type', label: 'Type', field: 'type', align: 'left' as const, sortable: true },
+  { name: 'issuer', label: 'Issuer', field: (row: Liability) => row.issuer?.username || 'System', align: 'left' as const },
+  { name: 'amount', label: 'Amount', field: 'amount', align: 'right' as const, sortable: true },
+  { name: 'status', label: 'Status', field: 'status', align: 'center' as const, sortable: true },
+  { name: 'dueDate', label: 'Due Date', field: 'dueDate', align: 'left' as const, sortable: true },
+  { name: 'createdAt', label: 'Date Issued', field: 'createdAt', align: 'left' as const, sortable: true },
+  { name: 'action', label: 'Action', field: 'action', align: 'center' as const },
+];
+
+const summaryCards = computed(() => {
+  const totalCount = liabilities.value.length;
+  const unpaidCount = liabilities.value.filter(l => l.status !== 'Paid').length;
+  const paidTotal = liabilities.value
+    .filter(l => l.status === 'Paid')
+    .reduce((sum, l) => sum + Number(l.amount), 0);
+
+  return [
+    { id: 1, title: 'Total Liabilities', value: totalCount.toString(), color: 'bg-blue-7' },
+    { id: 2, title: 'Unpaid Count', value: unpaidCount.toString(), color: 'bg-indigo-7' },
+    { id: 3, title: 'Outstanding Balance', value: formatCurrency(totalOutstanding.value), color: 'bg-grey-7' },
+    { id: 4, title: 'Paid Total', value: formatCurrency(paidTotal), color: 'bg-blue-grey-7' },
+  ];
+});
+
+function formatCurrency(value: number | string | undefined) {
+  if (value === undefined) return '₱0.00';
+  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(value));
 }
 
-interface SummaryCard {
-  id: number;
-  title: string;
-  value: string;
-  color: string;
+function getStatusColor(status: string) {
+  switch (status) {
+    case 'Paid': return 'positive';
+    case 'Unpaid': return 'warning';
+    case 'Cancelled': return 'grey';
+    default: return 'grey';
+  }
 }
 
-export default {
-  data() {
-    return {
-      showPaidModal: false,
-      selected: null as Liability | null,
+async function fetchLiabilities() {
+  loading.value = true;
+  try {
+    const response = await BansayService.getInstance().getMyLiabilities();
+    liabilities.value = response.liabilities;
+    totalOutstanding.value = response.totalOutstandingBalance;
+  } catch (error) {
+    console.error('Failed to fetch liabilities:', error);
+    
+  } finally {
+    loading.value = false;
+  }
+}
 
-      summaryCards: [
-        { id: 1, title: 'Total Liabilities', value: '', color: 'bg-blue-7' },
-        { id: 2, title: 'Unpaid Count', value: '', color: 'bg-indigo-7' },
-        { id: 3, title: 'Outstanding Balance', value: '', color: 'bg-grey-7' },
-        { id: 4, title: 'Paid Total', value: '', color: 'bg-blue-grey-7' },
-      ] as SummaryCard[],
-
-      liabilities: [] as Liability[],
-
-      columns: [
-        { name: 'type', label: 'Type', field: 'type' },
-        { name: 'issuer', label: 'Issuer', field: 'issuer' },
-        { name: 'amount', label: 'Amount', field: 'amount' },
-        { name: 'status', label: 'Status', field: 'status' },
-        { name: 'dueDate', label: 'Due Date', field: 'dueDate' },
-        { name: 'remarks', label: 'Remarks', field: 'remarks' },
-        { name: 'action', label: 'Action', field: 'action' },
-      ],
-    };
-  },
-
-  methods: {
-    openMarkPaid(row: Liability) {
-      this.selected = row;
-      this.showPaidModal = true;
-    },
-
-    confirmPaid() {
-      if (this.selected) {
-        this.selected.status = 'paid';
-      }
-      this.showPaidModal = false;
-    },
-  },
-};
+onMounted(() => {
+  void fetchLiabilities();
+});
 </script>
 
 <style scoped>
